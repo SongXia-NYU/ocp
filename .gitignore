@@ -5,6 +5,7 @@ results
 logs
 *.traj
 experimental
+slurm-*.out
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
