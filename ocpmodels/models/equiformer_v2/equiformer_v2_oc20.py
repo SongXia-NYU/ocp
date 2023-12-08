@@ -398,7 +398,7 @@ class EquiformerV2_OC20(BaseModel):
         self.apply(self._uniform_init_rad_func_linear_weights)
 
     @conditional_grad(torch.enable_grad())
-    def forward(self, data):
+    def forward(self, data, return_embedding=False):
         self.batch_size = len(data.natoms)
         self.dtype = data.pos.dtype
         self.device = data.pos.device
@@ -496,6 +496,9 @@ class EquiformerV2_OC20(BaseModel):
 
         # Final layer norm
         x.embedding = self.norm(x.embedding)
+
+        if return_embedding:
+            return x
 
         ###############################################################
         # Energy estimation

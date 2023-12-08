@@ -15,6 +15,7 @@ def init_edge_rot_mat(edge_distance_vec):
                 torch.min(edge_vec_0_distance)
             )
         )
+        raise InitEdgeRotError("Atoms should be far enough apart.")
 
     norm_x = edge_vec_0 / (edge_vec_0_distance.view(-1, 1))
 
@@ -44,7 +45,8 @@ def init_edge_rot_mat(edge_distance_vec):
 
     vec_dot = torch.abs(torch.sum(edge_vec_2 * norm_x, dim=1))
     # Check the vectors aren't aligned
-    assert torch.max(vec_dot) < 0.99
+    if torch.max(vec_dot) >= 0.99:
+        raise InitEdgeRotError(f"Vector should not be aligned.")
 
     norm_z = torch.cross(norm_x, edge_vec_2, dim=1)
     norm_z = norm_z / (torch.sqrt(torch.sum(norm_z**2, dim=1, keepdim=True)))
@@ -61,3 +63,7 @@ def init_edge_rot_mat(edge_distance_vec):
     edge_rot_mat = torch.transpose(edge_rot_mat_inv, 1, 2)
 
     return edge_rot_mat.detach()
+
+
+class InitEdgeRotError(Exception):
+    pass
