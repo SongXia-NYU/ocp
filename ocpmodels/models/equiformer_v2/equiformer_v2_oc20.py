@@ -152,6 +152,7 @@ class EquiformerV2_OC20(BaseModel):
         avg_degree: Optional[float] = None,
         use_energy_lin_ref: Optional[bool] = False,
         load_energy_lin_ref: Optional[bool] = False,
+        out_dim: int = 1
     ):
         super().__init__()
 
@@ -354,7 +355,7 @@ class EquiformerV2_OC20(BaseModel):
         self.energy_block = FeedForwardNetwork(
             self.sphere_channels,
             self.ffn_hidden_channels,
-            1,
+            out_dim,
             self.lmax_list,
             self.mmax_list,
             self.SO3_grid,
