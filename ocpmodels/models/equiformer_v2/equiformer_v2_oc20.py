@@ -111,7 +111,7 @@ class EquiformerV2_OC20(BaseModel):
         self,
         num_atoms: int,  # not used
         bond_feat_dim: int,  # not used
-        num_targets: int,  # not used
+        num_targets: int, 
         use_pbc: bool = True,
         regress_forces: bool = True,
         otf_graph: bool = True,
@@ -152,7 +152,6 @@ class EquiformerV2_OC20(BaseModel):
         avg_degree: Optional[float] = None,
         use_energy_lin_ref: Optional[bool] = False,
         load_energy_lin_ref: Optional[bool] = False,
-        out_dim: int = 1
     ):
         super().__init__()
 
@@ -186,6 +185,8 @@ class EquiformerV2_OC20(BaseModel):
         self.grid_resolution = grid_resolution
 
         self.num_sphere_samples = num_sphere_samples
+
+        self.num_targets: int  = num_targets
 
         self.edge_channels = edge_channels
         self.use_atom_edge_embedding = use_atom_edge_embedding
@@ -355,7 +356,7 @@ class EquiformerV2_OC20(BaseModel):
         self.energy_block = FeedForwardNetwork(
             self.sphere_channels,
             self.ffn_hidden_channels,
-            out_dim,
+            num_targets,
             self.lmax_list,
             self.mmax_list,
             self.SO3_grid,
@@ -507,11 +508,11 @@ class EquiformerV2_OC20(BaseModel):
         node_energy = self.energy_block(x)
         node_energy = node_energy.embedding.narrow(1, 0, 1)
         energy = torch.zeros(
-            len(data.natoms),
+            [len(data.natoms), self.num_targets],
             device=node_energy.device,
             dtype=node_energy.dtype,
         )
-        energy.index_add_(0, data.batch, node_energy.view(-1))
+        energy.index_add_(0, data.batch, node_energy.view(-1, self.num_targets))
         energy = energy / self.avg_num_nodes
 
         # Add the per-atom linear references to the energy.
