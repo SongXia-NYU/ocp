@@ -471,13 +471,13 @@ class FeedForwardNetwork(torch.nn.Module):
         )
 
     def forward(self, input_embedding):
-
+        # input_embedding [-1, 25, 128]
         gating_scalars = None
         if self.use_grid_mlp:
             if self.use_sep_s2_act:
                 gating_scalars = self.scalar_mlp(
                     input_embedding.embedding.narrow(1, 0, 1)
-                )
+                ) # [-1, 1, 128]
         else:
             if self.gating_linear is not None:
                 gating_scalars = self.gating_linear(
@@ -487,7 +487,7 @@ class FeedForwardNetwork(torch.nn.Module):
         input_embedding = self.so3_linear_1(input_embedding)
 
         if self.use_grid_mlp:
-            # Project to grid
+            # Project to grid [-1, 18, 18, 128]
             input_embedding_grid = input_embedding.to_grid(
                 self.SO3_grid, lmax=self.max_lmax
             )
@@ -527,7 +527,7 @@ class FeedForwardNetwork(torch.nn.Module):
 
         input_embedding = self.so3_linear_2(input_embedding)
 
-        return input_embedding
+        return input_embedding # [-1, 25, 1]
 
 
 class TransBlockV2(torch.nn.Module):

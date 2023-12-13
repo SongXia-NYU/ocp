@@ -505,8 +505,8 @@ class EquiformerV2_OC20(BaseModel):
         ###############################################################
         # Energy estimation
         ###############################################################
-        node_energy = self.energy_block(x)
-        node_energy = node_energy.embedding.narrow(1, 0, 1)
+        node_energy = self.energy_block(x) # [-1, 25, 1]
+        node_energy = node_energy.embedding.narrow(1, 0, 1) # [-1, 1, 1]
         energy = torch.zeros(
             [len(data.natoms), self.num_targets],
             device=node_energy.device,
